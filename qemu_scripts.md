@@ -134,3 +134,40 @@ including defining the VM's hardware characteristics, storage, network settings,
     f'--enable-kvm -m {args.vm_memory} -smp {args.vm_num_cpus} -cpu host '
     f'-net nic,model=e1000 -net user,hostfwd=tcp::{args.host_ssh_port}-:22'
 ```
+
+
+qemu-img create -f qcow2 myVirtualDisk.qcow2 20G
+
+qemu-system-x86_64 -enable-kvm -cdrom http://archive.ubuntu.com/ubuntu/dists/bionic-updates/main/installer-amd64/current/images/netboot/mini.iso
+
+qemu-system-x86_64 -M ubuntu,accel=kvm,kernel-irqchip=split -device intel-iommu,intremap=on -smp cpus=300,maxcpus=300 ...
+
+
+Create 60GB disk image for new KVM VM:
+    Let us create 60GB image named ‘nixcraft-rhel8.new.image’ to store our new VM:
+    export LIBGUESTFS_BACKEND=direct
+    qemu-img create -f qcow2 -o preallocation=metadata $VM.new.image 60G
+
+qemu-system-x86_64 -boot d -cdrom /path/debian.iso -m 1024 -hda /path/myvm.qcow2
+
+sudo qemu-system-x86_64 --enable-kvm -m 1024 -hda myvm.qcow
+
+
+#### Machine Type
+
+```
+A VM’s Machine Type defines the hardware layout of the VM’s virtual motherboard. You can choose between the default ```Intel 440FX``` or the ```Q35 chipset```, which also provides a virtual PCIe bus, and thus may be desired if you want to pass through PCIe hardware. Additionally, you can select a vIOMMU implementation.
+```
+
+
+#### Intel vIOMMU
+
+- Intel vIOMMU specific VM requirements:
+    Whether you are using an Intel or AMD CPU on your host, it is important to set intel_iommu=on in the VMs kernel parameters.
+
+    To use Intel vIOMMU you need to set q35 as the machine type.
+
+If all requirements are met, you can add viommu=intel to the machine parameter in the configuration of the VM that should be able to pass through PCI devices.
+
+qm set VMID -machine q35,viommu=intel
+
