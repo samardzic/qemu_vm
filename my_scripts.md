@@ -1,0 +1,1 @@
+qemu-system-x86_64 -m 8196- -smp 6 -enable-kvm -cdrom "D:\VM\linuxmint-21.3-xfce-64bit.iso" -boot menu=on -drive file="d:\VM\debian\debian.qcow2"

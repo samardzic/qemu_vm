@@ -112,8 +112,11 @@ $ qemu-kvm --help | grep no-kvm
 
 ```
 qemu-system-arm -m 1024 -cpu cortex-a57 -M virt -nographic -pflash flash0.img -pflash flash1.img -drive if=none,file=xenial-server-cloudimg-arm64-uefi1.img,id=hd0 -device virtio-blk-device,drive=hd0 -netdev type=tap,id=net0 -device virtio-net-device,netdev=net0,mac=$randmac
+
 qemu-system-arm -m 1024 -cpu cortex-a57 -M virt -nographic -drive file=flash0.img,format=raw,if=pflash -drive file=flash1.img,format=raw,if=pflash -drive if=none,file=xenial-server-cloudimg-arm64-uefi1.img,id=hd0 -device virtio-blk-device,drive=hd0 -device virtio-net-device,netdev=net0,mac=$randmac -netdev type=tap,id=net0
+
 qemu-system-x86_64 -drive file=virtualdebian.img -enable-kvm -vga virtio -device virtio-serial-pci -spice unix,addr=/tmp/vm_spice.socket,disable-ticketing -device virtserialport,chardev=spicechannel0,name=com.redhat.spice.0 -chardev spicevmc,id=spicechannel0,name=vdagent
+
 qemu-system-x86_64 -m 8196 -M q35,accel=kvm,kernel-irqchip=split -cpu host -smp 8 -drive file=~/qemu/ubuntu-18.04.2-desktop-amd64.img.qcow2,format=qcow2 -vnc :5 -net nic -net user,hostfwd=tcp::2222-:22 -device intel-iommu,intremap=on  **-vga cirrus**
 
 ```
