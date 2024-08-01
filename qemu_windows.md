@@ -46,3 +46,32 @@ On Windows, you can achieve a similar speed-up with ```-accel hax (or -enable-ha
     CPU has virtualization extension and BIOS has NOT disabled the extension.
     Hyper-V must be disabled. Refer to this page for more information.
 
+
+
+### Check HAXM
+
+
+- To verify that Intel HAXM is running, open a Command Prompt window with administrator privileges (Run as Administrator) 
+  and execute the following command:
+
+```
+    PS C:\Build\qemu_vm\Install> sc query intelhaxm
+
+    SERVICE_NAME: intelhaxm
+            TYPE               : 1  KERNEL_DRIVER
+            STATE              : 1  STOPPED
+            WIN32_EXIT_CODE    : 31  (0x1f)
+            SERVICE_EXIT_CODE  : 0  (0x0)
+            CHECKPOINT         : 0x0
+            WAIT_HINT          : 0x0
+```
+
+- For Android:
+
+```
+    PS C:\Users\uia66114\AppData\Local\Android\Sdk\emulator> emulator -accel-check
+    accel: 15
+    Please disable Hyper-V before using the Android Emulator.  
+    Start a command prompt as Administrator, run 'bcdedit /set hypervisorlaunchtype off', reboot.
+    accel
+```
