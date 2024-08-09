@@ -9,3 +9,4 @@ The option to enable HAXM is -accel hax
 
 
 PS C:\qemu> qemu-system-x86_64 -m 8196 -smp 6 -cdrom "D:\VM\linuxmint-21.3-xfce-64bit.iso" -boot menu=on -drive file="d:\VM\debian\debian.qcow2" -machine accel=hax
+qemu-system-x86_64 -accel whpx -hda .\[name].qcow2 -m 512 -net nic,model=virtio -net user -cdrom .\[name].iso -vga std -boot strict=on
