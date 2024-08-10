@@ -3,18 +3,31 @@
 set IMAGE_SOURCE="d:\Virtual Machines\Linux_Miny_LMDE6\linux_miny_lmde6.qcow2"
 set ISO_IMAGE="d:\Virtual Machines\lmde-6-cinnamon-64bit.iso"
 
-qemu-system-x86_64 ^
-    -name "Alpine Linux" ^
+
+call c:
+
+c:\qemu\qemu-system-x86_64 ^
+	-m 8192 ^
     -smp 6 ^
-    -m 8192 ^
-    -vga qxl ^
-    -accel whpx ^
-    -rtc base=utc ^
-    -drive file=%IMAGE_SOURCE%,if=virtio,format=qcow2 ^
-    -boot order=cd,menu=on ^
-    -device qemu-xhci ^
-    -cdrom %ISO_IMAGE%
-	
+    -drive file=%IMAGE_SOURCE% ^
+	-accel hax ^
+	-rtc base=utc ^
+	-display gtk
+
+:: qemu-system-x86_64 ^
+::     -name "Alpine Linux" ^
+::     -smp 6 ^
+::     -m 8192 ^
+::     -vga qxl ^
+::     -accel whpx ^
+::     -rtc base=utc ^
+::     -drive file=%IMAGE_SOURCE%,if=virtio,format=qcow2 ^
+::     -boot order=cd,menu=on ^
+::     -device qemu-xhci ^
+::     -cdrom %ISO_IMAGE%
+:: 	
+
+
 :: qemu-system-x86_64 ^
 ::     -name "Alpine Linux" ^
 ::     -machine type=pc-q35-6.0 ^
