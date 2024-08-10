@@ -18,6 +18,129 @@ exec qemu-system-x86_64 \
  -name "win10" \
  -usb -device usb-ehci -device usb-host,vendorid=0x091e \
  -display gtk,grab-on-hover=on
+```
+
+#### Enable Virtualization
+
+```
+-enable-kvm -cpu host -m 4G
+-accel hax or --enable-hax or -machine accel=hax
+```
+
+-   This enables the KVM virtualization support and passthrough the CPU specs. Note this only creates one cpu in the
+    Virtual environment. In addition the system will have 4gb of memory.
+    
+    
+##### AEHD - HAXM (-accel hax) (removed in 8.2)
+
+- The HAXM project has been retired (see https://github.com/intel/haxm#status). 
+- Use "whpx" (on Windows) or "hvf" (on macOS) instead.
+
+- Enter windows features in the Windows search box and select Turn Windows features on or off in the search results. In the Windows Features dialog, enable both:
+    - Hyper-V and 
+    - Windows Hypervisor Platform
+
+```
+# In CMD run:
+    sc query aehd
+    
+SERVICE_NAME: aehd
+       ...
+       STATE              : 1  STOPPED
+       WIN32_EXIT_CODE    : 4294967201 (0xffffffa1)
+       ...
+	   
+```
+
+-The following error message means that the virtualization extension isn't enabled in your BIOS or that Hyper-V isn't disabled:
+
+<br/>
+
+
+
+#### Drive option
+
+```
+-drive file=win10.qcow2,if=virtio
+-drive file=alpine.img,index=0,media=disk,format=raw
+
+-device virtio-scsi-pci,id=scsi \
+-drive file=/media/kv/vms/win-qad.img,id=disk,format=raw -device scsi-hd,drive=disk \
+-drive file=/dev/sdg1,id=shared_disk,format=raw -device ide-hd,bus=ide.1,drive=shared_disk \
+
+-drive file=${WINDOWS_INSTALL_ISO},format=raw,if=none,media=cdrom,id=drive-cd1,readonly=on \
+-device ahci,id=achi0 \
+-device ide-cd,bus=achi0.0,drive=drive-cd1,id=cd1,bootindex=1
+```
+
+-   Very important to mount your drive image!
+
+-   device virtio-tablet
+
+    -   The virtio-tablet is needed if you wish the virtual window to release the keyboard/mouse when you move the mouse
+        out of the window. Otherwise you have to use Ctrl-Alt-g (huge pain)
+
+-   rtc base=localtime
+
+    -   This is will format the virtual real time clock so Windows will get the correct time.
+
+-   net nic,model=virtio-net-pci -net user,hostname=win10
+
+    -   Networking is pretty basic with a simple NAT setup.
+
+-   monitor stdio
+
+    -   The QEMU control console will be launched from the same terminal this script runs from.
+
+-   name “win10”
+
+    -   win10 will be displayed at the top of the virtual window.
+
+-   usb -device usb-ehci -device usb-host,vendorid=0x091e
+
+    -   This is the USB pass-thru. For some reason USB 3 wouldn’t work and I had to define a USB 2 virtual device to
+        host the pass through. It is critical to define the USB hub device BEFORE the pass-thru definitions. The
+        vendorid allows Windows 10 to capture any Garmin device plugged into the host machine (more below).
+
+-   display gtk,grab-on-hover=on
+    -   A very important undocumented feature! When you move the mouse into the virtual window it auto-magically
+        captures the keyboard!
+
+#### Boot menu
+
+- Note that it does not make sense to use the bootindex property together with the -boot order=... (or -boot once=...) parameter
+
+```
+    -device virtio-scsi-pci,id=scsi \
+    -drive file=/media/kv/vms/win-qad.img,id=disk,format=raw -device scsi-hd,drive=disk \
+    -drive file=/dev/sdg1,id=shared_disk,format=raw -device ide-hd,bus=ide.1,drive=shared_disk \
+
+    Yes, "sata" device is probed first, but you can change the boot device either "hand-off" with:
+        -boot order=c
+
+    or by manual selection with:
+        -boot menu=on
+
+    Both option can be used thogether:
+        -boot order=c,menu=on
+```
+
+```
+Let’s assume we have a QEMU machine with two NICs (virtio, e1000) and two disks (IDE, virtio):
+
+qemu-system-x86_64 -drive file=disk1.img,if=none,id=disk1 \
+              -device ide-hd,drive=disk1,bootindex=4 \
+              -drive file=disk2.img,if=none,id=disk2 \
+              -device virtio-blk-pci,drive=disk2,bootindex=3 \
+              -netdev type=user,id=net0 \
+              -device virtio-net-pci,netdev=net0,bootindex=2 \
+              -netdev type=user,id=net1 \
+              -device e1000,netdev=net1,bootindex=1
+
+Given the command above, firmware should try to boot from the e1000 NIC first. If this fails, it should try the virtio NIC next; if this fails too, it should try the virtio disk, and then the IDE disk.
+```
+
+ <br/>
  ```
  
  
